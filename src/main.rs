@@ -6,8 +6,13 @@ use amethyst::{
         types::DefaultBackend,
         RenderingBundle,
     },
-    utils::application_root_dir,
+    utils::application_root_dir, input::{InputBundle, StringBindings}, ui::UiBundle,
 };
+
+mod compromised;
+mod systems;
+
+use crate::compromised::Compromised;
 
 struct MyState;
 
@@ -23,8 +28,12 @@ fn main() -> amethyst::Result<()> {
     let assets_dir = app_root.join("assets");
     let config_dir = app_root.join("config");
     let display_config_path = config_dir.join("display.ron");
-
+    let binding_path = app_root.join("config").join("bindings.ron");
+    let input_bundle = InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?;
     let game_data = GameDataBuilder::default()
+        .with_bundle(TransformBundle::new())?
+        .with_bundle(input_bundle)?
+        .with(systems::MovementSystem, "movement_system", &["input_system"])
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
@@ -33,9 +42,10 @@ fn main() -> amethyst::Result<()> {
                 )
                 .with_plugin(RenderFlat2D::default()),
         )?
-        .with_bundle(TransformBundle::new())?;
+        .with_bundle(UiBundle::<StringBindings>::new())?;
 
-    let mut game = Application::new(assets_dir, MyState, game_data)?;
+
+    let mut game = Application::new(assets_dir, Compromised, game_data)?;
     game.run();
 
     Ok(())

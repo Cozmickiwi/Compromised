@@ -1,0 +1,7 @@
+(
+  axes: {},
+  actions: {
+    "right": [[Key(D)]],
+    "left": [[Key(A)]],
+  }
+)
