@@ -36,8 +36,8 @@ fn initialise_camera(world: &mut World) {
         .build();
 }
 
-pub const CAR_HEIGHT: f32 = 18.0;
-pub const CAR_WIDTH: f32 = 10.0;
+pub const CAR_HEIGHT: f32 = 11.0;
+pub const CAR_WIDTH: f32 = 5.0;
 
 pub struct Carwell {
     pub width: f32,
