@@ -33,7 +33,7 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
-        .with(systems::MovementSystem, "movement_system", &["input_system"])
+        .with(systems::MovementSystem::new(), "movement_system", &["input_system"])
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
