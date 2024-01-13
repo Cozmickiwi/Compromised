@@ -1,6 +1,12 @@
 extern crate amethyst;
 
-use amethyst::{core::Transform, prelude::*, renderer::{Camera, SpriteSheet, SpriteRender, Texture, ImageFormat, SpriteSheetFormat}, ecs::{Component, DenseVecStorage}, assets::{Handle, Loader, AssetStorage}};
+use amethyst::{
+    assets::{AssetStorage, Handle, Loader},
+    core::Transform,
+    ecs::{Component, DenseVecStorage},
+    prelude::*,
+    renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+};
 
 pub struct Compromised;
 
@@ -8,8 +14,11 @@ impl SimpleState for Compromised {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         let carwell_sprite_sheet_handle = load_carwell_sprite(world);
+        let block_sprite_sheet_handle = load_block_sprite(world);
         world.register::<Carwell>();
         initialise_carwell(world, carwell_sprite_sheet_handle);
+        world.register::<Block>();
+        initialise_block(world, block_sprite_sheet_handle);
         initialise_camera(world);
     }
 }
@@ -75,6 +84,62 @@ fn load_carwell_sprite(world: &mut World) -> Handle<SpriteSheet> {
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
         "carwell/carwell.ron",
+        SpriteSheetFormat(texture_handle),
+        (),
+        &sprite_sheet_store,
+    )
+}
+
+pub const BLOCK_WIDTH: f32 = 50.0;
+pub const BLOCK_HEIGHT: f32 = 7.0;
+
+pub struct Block {
+    pub width: f32,
+    pub height: f32,
+}
+
+impl Block {
+    fn new() -> Block {
+        Block {
+            width: BLOCK_WIDTH,
+            height: BLOCK_HEIGHT,
+        }
+    }
+}
+
+impl Component for Block {
+    type Storage = DenseVecStorage<Self>;
+}
+
+
+
+fn initialise_block(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
+    let sprite_render = SpriteRender::new(sprite_sheet_handle, 0);
+    let mut block_transform = Transform::default();
+    block_transform.set_translation_xyz(AREA_WIDTH * 0.75, 15.0, -0.01);
+    world
+        .create_entity()
+        .with(sprite_render)
+        .with(Block::new())
+        .with(block_transform)
+        .build();
+}
+
+fn load_block_sprite(world: &mut World) -> Handle<SpriteSheet> {
+    let texture_handle = {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        loader.load(
+            "block/block.png",
+            ImageFormat::default(),
+            (),
+            &texture_storage,
+        )
+    };
+    let loader = world.read_resource::<Loader>();
+    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+    loader.load(
+        "block/block.ron",
         SpriteSheetFormat(texture_handle),
         (),
         &sprite_sheet_store,
